@@ -1,0 +1,22 @@
+## instalando istio ##
+# curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.2 sh -
+
+# cd istio-1.2.2
+
+# export PATH=$PWD/bin:$PATH
+
+# for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
+
+# kubectl api-resources | grep istio 
+
+# kubectl get crd | grep istio
+
+# kubectl apply -f install/kubernetes/istio-demo.yaml
+
+# kubectl get svc -n istio-system
+
+# kubectl get pods -n istio-system
+
+# kubectl label namespace default istio-injection=enabled
+
+# kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
