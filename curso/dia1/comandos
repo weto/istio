@@ -20,3 +20,30 @@
 # kubectl label namespace default istio-injection=enabled
 
 # kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+#
+#
+############################################
+###########################################
+#
+# kubectl get namespaces -L istio-system
+  367  kubectl get events
+  368  less /proc/cpuinfo
+  369  less /proc/cpuinfo
+  370  systemctl status kubelet.service
+  371  clear
+  372  systemctl status kubelet.service
+  373  systemctl status kubelet.service
+  374  clear
+  375  systemctl restart kubelet.service
+  376  kubectl get pods -n istio-system
+  377  kubectl get pods -n istio-system
+  378  kubectl get pods -n istio-system
+  379  kubectl get pods -n istio-system
+  380  kubectl get pods -n istio-system
+  381  systemctl stop kubelet.service
+  382  systemctl start kubelet.service
+  383  clear
+  384  kubectl get pods -n istio-system
+  385  kubectl get pods -n istio-system
+  386  history
+

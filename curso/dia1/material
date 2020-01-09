@@ -1,0 +1,230 @@
+Criando o Kubernetes Cluster
+Para detalhes sobre a instalação do Kubernetes, veja a aula Day1 do treinamento Descomplicando o Kubernetes!
+
+
+
+# curl -fsSL https://get.docker.com | bash
+
+# apt-get update && apt-get install -y apt-transport-https
+
+# curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+# echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" >  /etc/apt/sources.list.d/kubernetes.list
+
+# apt-get update
+
+# apt-get install -y kubelet kubeadm kubectl
+
+# kubeadm config images pull
+
+# kubeadm init
+
+# mkdir -p $HOME/.kube
+
+# sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+# kubectl get nodes
+
+
+
+O que é Service Mesh?
+
+
+Hoje em dia com o crescimento dos micro-serviços começamos a nos deparar com alguns problemas gerados por essa nova era, e um deles é organizar e conseguir manter toda essa malha de aplicativos e serviços.
+
+Hoje é bem comum você possuir uma quantidade grande de aplicações rodando em seu ambiente. Por exemplo, você tem uma aplicação para a parte do checkout de seu site, outra aplicação para a home. Provavelmente você possui um Redis, MongoDB, Nginx, RabbitMQ ou um ElasticSearch…
+
+Para que possamos sobreviver a essa nova realidade, o Service Mesh nos possibilita ter uma visão bem melhor, segurança e um controle sobre nossas aplicações de uma maneira, de certa forma, simples.
+
+Durante esses 4 dias, nós vamos aprender muita coisa sobre uma das opções que temos para usufruir das características que um service mesh nos provê, como load balancing, service discovery, observability, autenticação e autorização, encriptação, entre outras.
+
+Utilizando um service mesh como o Istio, podemos ter muito mais controle sobre como nossos serviços e aplicações se comunicam e qual a sua qualidade e seus detalhes.
+
+
+
+
+
+O que é o Istio?
+
+
+O Istio é um service mesh bem utilizado pela comunidade e que reduz muito a complexidade quando precisamos realizar o deploy de nossas aplicação de maneira mais eficiente.
+
+Por exemplo, quando utilizamos o Istio como service mesh de nossos serviços já temos por padrão a possibilidade de visualizar as métricas de nossas aplicações em interfaces bem interessantes como Grafana, Prometheus e o Kiali.
+
+Temos a possibilidade de utilizar estratégias de deployment como Canary ou A/B, encaminhar requisições para diferentes versões da mesma aplicação utilizando como base informações no header da requisição, por exemplo.
+
+Quer saber mais detalhes, bora lá conferir os vídeos do primeiro dia de treinamento e não se esqueça de ver os detalhes dos comandos e arquivos utilizados aqui nesse material! 
+
+Bora começar a brincadeira e conhecendo cada componente e cada característica importante do Istio!
+
+
+
+
+
+Instalação
+Essa será a nossa primeira instalação do Istio durante o treinamento, a ideia é mostrar alguns recursos do Istio e conforme nos aprofundamos no conteúdo, iremos realizar a instalação do mesmo de outras formas.
+
+
+
+Antes de começar, fiquem atentos as portas que precisamos liberar que possamos utilizar o Istio sem nenhum problema:
+
+
+
+
+
+* Imagem retirada do site do Istio.io (portas)
+https://process.fs.teachablecdn.com/ADNupMnWyR7kCWRvm76Laz/resize=width:1000/https://www.filepicker.io/api/file/j9LsJUaFR0q75RsPJZbJ
+
+
+
+
+
+# curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.2.2 sh -
+
+# cd istio-1.2.2
+
+# export PATH=$PWD/bin:$PATH
+
+
+
+Para que possamos utilizar o Istio no Kubernetes, nós precisamos criar alguns CRDs (Custom Resource Definitions), que nada mais são do que recursos customizados, ou seja, estamos criando resources para que o Istio possa funcionar perfeitamente no K8s. Estamos extendendo o Kubernetes. :)
+
+Com isso conseguimos criar objetos customizados em nosso cluster. Essa funcionalidade no k8s está disponível desde a versão 1.7.
+
+
+
+Agora vamos fazer a criação desses CDRs:
+
+# for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
+
+
+
+Para visualizar os resources e CDRs criados pelo istio, faça:
+
+# kubectl api-resources | grep istio 
+
+# kubectl get crd | grep istio
+
+
+
+Agora, após a criação dos CDRs já podemos realizar o deploy do Istio. Nessa nossa primeira instalação, vamos utilizar a versão demo do Istio, que vem com um set de componentes já definido, porém nas próximas instalações, vamos explorar um pouco mais as possibilidades, escolhendo quais componentes queremos em nosso Istio, bem como utilizar o helm para realizar a sua instalação.
+
+# kubectl apply -f install/kubernetes/istio-demo.yaml
+
+
+
+# kubectl get svc -n istio-system
+
+NAME                     TYPE CLUSTER-IP       EXTERNAL-IP PORT(S)                                                                                                                           AGE
+
+grafana                  ClusterIP 10.103.231.65    <none> 3000/TCP                                                                                                                           98s
+
+istio-citadel            ClusterIP 10.110.118.18    <none> 8060/TCP,15014/TCP                                                                                                                           98s
+
+istio-egressgateway      ClusterIP 10.99.45.153     <none> 80/TCP,443/TCP,15443/TCP                                                                                                                     99s
+
+istio-galley             ClusterIP 10.107.245.48    <none> 443/TCP,15014/TCP,9901/TCP                                                                                                                   99s
+
+istio-ingressgateway     LoadBalancer 10.105.247.159   <pending> 15020:30064/TCP,80:31380/TCP,443:31390/TCP,31400:31400/TCP,15029:30599/TCP,15030:32558/TCP,15031:32445/TCP,15032:32009/TCP,15443:31255/TCP   98s
+
+istio-pilot              ClusterIP 10.107.106.155   <none> 15010/TCP,15011/TCP,8080/TCP,15014/TCP                                                                                                       98s
+
+istio-policy             ClusterIP 10.107.194.9     <none> 9091/TCP,15004/TCP,15014/TCP                                                                                                                 98s
+
+istio-sidecar-injector   ClusterIP 10.96.194.30     <none> 443/TCP                                                                                                                           98s
+
+istio-telemetry          ClusterIP 10.107.193.233   <none> 9091/TCP,15004/TCP,15014/TCP,42422/TCP                                                                                                       98s
+
+jaeger-agent             ClusterIP None       <none> 5775/UDP,6831/UDP,6832/UDP                                                                                                                   98s
+
+jaeger-collector         ClusterIP 10.96.222.166    <none> 14267/TCP,14268/TCP                                                                                                                          98s
+
+jaeger-query             ClusterIP 10.100.51.165    <none> 16686/TCP                                                                                                                           98s
+
+kiali                    ClusterIP 10.107.146.182   <none> 20001/TCP                                                                                                                           98s
+
+prometheus               ClusterIP 10.105.163.24    <none> 9090/TCP                                                                                                                           98s
+
+tracing                  ClusterIP 10.100.61.57     <none> 80/TCP                                                                                                                           98s
+
+zipkin                   ClusterIP 10.107.246.5     <none> 9411/TCP                                                                                                                           98s
+
+
+
+# kubectl get pods -n istio-system
+
+NAME                                      READY STATUS RESTARTS AGE
+
+grafana-6575997f54-4kqnr                  1/1 Running 0 2m38s
+
+istio-citadel-894d98c85-hlbpb             1/1 Running 0 2m37s
+
+istio-cleanup-secrets-1.2.2-mzbbn         0/1 Completed 0 2m39s
+
+istio-egressgateway-9b7866bf5-kw85t       1/1 Running 0 2m38s
+
+istio-galley-5b984f89b-b2hpf              1/1 Running 0 2m38s
+
+istio-grafana-post-install-1.2.2-767sx    0/1 Completed 0 2m39s
+
+istio-ingressgateway-75ddf64567-w8psf     1/1 Running 0 2m38s
+
+istio-pilot-5d77c559d4-nlr5b              2/2 Running 0 2m38s
+
+istio-policy-86478df5d4-7rxhd             2/2 Running 3 2m38s
+
+istio-security-post-install-1.2.2-wqq8h   0/1 Completed 0 2m39s
+
+istio-sidecar-injector-7b98dd6bcc-8hpv6   1/1 Running 0 2m37s
+
+istio-telemetry-786747687f-sc2hf          2/2 Running 3 2m38s
+
+istio-tracing-555cf644d-qlv9x             1/1 Running 0 2m37s
+
+kiali-6cd6f9dfb5-f28v5                    1/1 Running 0 2m38s
+
+prometheus-7d7b9f7844-5kdv6               1/1 Running 0 2m38s
+
+
+
+
+
+Vamos conhecer alguns componentes do Istio:
+
+Citadel => Responsável por prover autenticação service-to-service usando mutual TLS, com gerenciamentos de identidade e credenciais.
+
+Galley => É responsável por tornar transparente qual orquestrador você está utilizando, ele utiliza as configurações especificadas pelo usuário e converte em configurações válidas para os componentes do control plane.
+
+Pilot => Ele é o responsável por pegar as informações do control plane e converter e aplicar no Envoy, além de ser o service discovery do Envoy.
+
+Envoy => É o sidecar, o proxy que sobe junto ao container de sua aplicação para estabelecer comunicação com outros serviços, controlando todo o tráfego entre os pods.
+
+Mixer => Responsável pela telemetria e estatisticas do proxy e o tráfego entre os services.
+
+
+
+Mas o que o que é control plane ou data plane?
+
+Data plane nada mais é do que o próprio Envoy, nosso proxy. Já o control plane é composto pelo Pilot, Galley, Citadel e o Mixer.
+
+
+
+Pronto, agora já temos nossos componentes em execução e já aprendemos sobre alguns deles, bora para o nosso primeiro exemplo para que possamos parar de falatório e ver ele em ação.
+
+Para o nosso primeiro exemplo vamos utilizar uma aplicação que traz informações sobre livros, como ranking e reviews. Veja no vídeo os detalhes!
+
+
+
+Vamos fazer com que todos os deployments que sejam executados no namespace default já sejam iniciados com o Envoy em cada pod, assim teremos o nosso container sidecar que irá realizar a comunicação entre os services. 
+
+
+
+# kubectl label namespace default istio-injection=enabled
+
+
+
+
